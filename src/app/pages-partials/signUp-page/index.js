@@ -12,16 +12,21 @@ export default function SignUpPage() {
     const [userData, setUserData] = useState({
         fullName: "",
         email: "",
-        password: ""
+        gender: "",
+        dateOfBirth: "",
+        password: "",
+
     })
     const [emptyInputs, setEmptyInputs] = useState(false)
 
 
     const submitForm = () => {
-        if (!userData.fullName || !userData.email || !userData.password) {
+
+        if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth) {
             setEmptyInputs(true);
-            return
+            return;
         }
+        setEmptyInputs(false)
         createUserWithEmailAndPassword(auth, userData.email, userData.password)
             .then((userCredential) => {
                 // Signed up 
@@ -49,6 +54,8 @@ export default function SignUpPage() {
         await setDoc(doc(db, "users", id), {
             name: userData.fullName,
             email: userData.email,
+            gender: userData.gender,
+            dateOfBirth: userData.dateOfBirth,
             id: id
         })
     }
@@ -58,14 +65,6 @@ export default function SignUpPage() {
     function handlePass() {
         setShowPass(!showPass)
     }
-
-
-
-
-
-
-
-
 
 
     return (
@@ -106,6 +105,10 @@ export default function SignUpPage() {
                                             value={userData.fullName}
                                             onChange={(event) => setUserData({ ...userData, fullName: event.target.value })}
                                         />
+                                        <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.fullName ? "opacity-100" : "opacity-0"
+                                            }`}>
+                                            Fill this field
+                                        </p>
                                     </div>
 
                                     <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
@@ -141,11 +144,104 @@ export default function SignUpPage() {
                                             value={userData.email}
                                             onChange={(event) => setUserData({ ...userData, email: event.target.value })}
                                         />
+                                        <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.fullName ? "opacity-100" : "opacity-0"
+                                            }`}>
+                                            Fill this field
+                                        </p>
                                     </div>
                                     <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
                                 </div>
                             </div>
                         </div>
+
+                        <div className="flex gap-[8px]">
+                            <div name="email" className="relative text-sm flex flex-col gap-2">
+                                <div
+                                    className="transition-all duration-500 ease-in-out flex flex-row gap-2 justify-between"
+                                >
+                                    <label
+                                        className="text-sm text peer-disabled:cursor-not-allowed peer-disabled:opacity-70 transition-colors text-foreground flex gap-2 items-center break-all leading-normal"
+                                        htmlFor="gender"
+                                    >
+                                        <span>Gender</span>
+                                    </label>
+                                </div>
+                                <div
+                                    className="transition-all duration-500 ease-in-out order-1 col-span-12"
+                                >
+                                    <div >
+                                        <select
+                                            id="gender"
+                                            name="gender"
+                                            className={`w-[189px] cursor-pointer rounded-md border border-control bg-black text-sm leading-4 px-2 h-[34px]
+                                                        placeholder:text-foreground-muted
+                                                        focus-visible:outline-none focus-visible:ring-1
+                                                        focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted
+                                                        disabled:cursor-not-allowed disabled:text-foreground-muted
+                                                        aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400
+                                                        aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive
+                                                         ${emptyInputs && !userData.gender ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                                          `}
+                                            value={userData.gender}
+                                            onChange={(event) => setUserData({ ...userData, gender: event.target.value })}
+                                        >
+                                            <option value="" disabled>Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+
+                                    </div>
+                                    <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.gender ? "opacity-100" : "opacity-0"
+                                        }`}>
+                                        Fill this field
+                                    </p>
+
+                                    <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
+                                </div>
+                            </div>
+
+                            <div name="email" className="relative text-sm flex flex-col gap-2">
+                                <div
+                                    className="transition-all duration-500 ease-in-out flex flex-row gap-2 justify-between"
+
+                                >
+                                    <label
+                                        className="text-sm text peer-disabled:cursor-not-allowed peer-disabled:opacity-70 transition-colors text-foreground flex gap-2 items-center break-all leading-normal"
+                                        htmlFor="date"
+                                    >
+                                        <span>Date of Birth</span>
+                                    </label>
+                                </div>
+                                <div
+                                    className="transition-all duration-500 ease-in-out order-1 col-span-12"
+                                >
+                                    <div  >
+                                        <input
+                                            type="date"
+                                            id="date"
+                                            name="date"
+                                            className={` w-[189px] cursor-pointer rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-2 py-0 w-[176px] h-[34px] 
+                                              ${emptyInputs && !userData.dateOfBirth ? "border-red-500 focus-visible:ring-red-500" : ""}`
+                                            }
+                                            value={userData.dateOfBirth}
+                                            onChange={(event) => setUserData({ ...userData, dateOfBirth: event.target.value })}
+                                        />
+
+                                    </div>
+                                    <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.dateOfBirth ? "opacity-100" : "opacity-0"
+                                        }`}>
+                                        Fill this field
+                                    </p>
+
+                                    <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
                         <div className="relative">
                             <div>
                                 <div name="password" className="relative text-sm flex flex-col gap-2">
@@ -181,6 +277,10 @@ export default function SignUpPage() {
                                                     value={userData.password}
                                                     onChange={(event) => setUserData({ ...userData, password: event.target.value })}
                                                 />
+                                                <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.fullName ? "opacity-100" : "opacity-0"
+                                                    }`}>
+                                                    Fill this field
+                                                </p>
                                                 <button
 
                                                     type="button"
@@ -198,7 +298,7 @@ export default function SignUpPage() {
                                     </div>
                                 </div>
                             </div>
-                           
+
                         </div>
 
                         <div
@@ -207,7 +307,7 @@ export default function SignUpPage() {
                             data-sentry-source-file="LastSignInWrapper.tsx"
                         >
                             <div className="w-full" onClick={submitForm}>
-                                
+
                                 <button
                                     data-size="large"
                                     form="sign-in-form"
