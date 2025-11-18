@@ -1,17 +1,71 @@
 'use client'
-
 import Link from "next/link"
-import { useState } from "react"
+import { use, useState } from "react"
 import HideEyeIcon from "../../../../public/svgs/hideEyeIcon"
 import ShowEyeIcon from "../../../../public/svgs/showEyeIcon"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth, db } from "../../../../config"
+// import { collection, getDocs } from "firebase/firestore"
 
 
 export default function LoginPage() {
-
     const [showPass, setShowPass] = useState(false)
+    const [loginData, setLoginData] = useState({
+        email: '',
+        password: ''
+    })
+    const [emptyInputs, setEmptyInputs] = useState(false)
+    const[showError , setShowError] = useState(false)
+
+
+    console.log(loginData)
+
+    const userSignIn = () => {
+        if (!loginData.email || !loginData.password) {
+            setEmptyInputs(true);
+            return
+        }
+        signInWithEmailAndPassword(auth, loginData.email, loginData.password)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                console.log(user, "User Sign ho chuka he")
+                setLoginData({
+                    email : "",
+                    password : ""
+                })
+                setShowError(false)
+                setEmptyInputs(false)
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                setShowError(true)
+                const errorMessage = error.message;
+            });
+
+    }
+
+    // const getAllUsers = async () => {
+    //     const querySnapshot = await getDocs(collection(db, "users"));
+    //     querySnapshot.forEach((doc) => {
+    //         console.log(doc.data());
+    //     });
+    // }
+
+    // getAllUsers()
+
+
+
     const handlePass = () => {
         setShowPass(!showPass)
     }
+
+
+
+
+
+
     return (
         <>
 
@@ -20,7 +74,8 @@ export default function LoginPage() {
             </div>
             <div className="flex-1 flex flex-col justify-center w-[330px] sm:w-[384px] mx-auto">
                 <div className="mb-10">
-                    <h1 className="mt-8 mb-2 lg:text-3xl">Login your Account</h1>
+                    <h1 className="mt-8 mb-2 lg:text-3xl">Welcome back</h1>
+                    <h2 className="text-sm text-gray-300 text-foreground-light">Sign in to your account</h2>
                 </div>
                 <div className="flex flex-col gap-5">
                     <form id="sign-in-form" className="flex flex-col gap-4">
@@ -49,10 +104,11 @@ export default function LoginPage() {
                                             name="email"
                                             placeholder="you@example.com"
 
-                                            className="flex w-full  rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px]"
-
-                                        // value={loginData.email}
-                                        // onChange={(event) => { setLoginData({ ...loginData, email: event.target.value }) }}
+                                            className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
+                                              ${emptyInputs && !loginData.email ? "border-red-500 focus-visible:ring-red-500" : ""}`
+                                            }
+                                            value={loginData.email}
+                                            onChange={(event) => { setLoginData({ ...loginData, email: event.target.value }) }}
                                         />
                                     </div>
                                     <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
@@ -89,10 +145,12 @@ export default function LoginPage() {
                                                     autoComplete="current-password"
                                                     name="password"
                                                     placeholder="••••••••"
-                                                    className="flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-2 h-[34px] pr-10"
+                                                    className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
+                                                        ${emptyInputs && !loginData.password ? "border-red-500 focus-visible:ring-red-500" : ""}`
+                                                    }
 
-                                                // value={loginData.password}
-                                                // onChange={(event) => { setLoginData({ ...loginData, password: event.target.value }) }}
+                                                    value={loginData.password}
+                                                    onChange={(event) => { setLoginData({ ...loginData, password: event.target.value }) }}
                                                 />
                                                 <button
                                                     type="button"
@@ -118,21 +176,21 @@ export default function LoginPage() {
                             >
                                 Forgot Password?
                             </a>
+                        {showError === true ? <p className="text-red-600 text-[10px]">Invalid credentials</p> : ""}
                         </div>
 
                         <div
                             className="flex items-center relative"
 
                         >
-                            <div className="w-full">
+                            <div className="w-full" onClick={userSignIn} >
                                 <button
 
 
                                     type="button"
 
-                                    className="relative bg-[#006239] cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 dark:hover:bg-brand/50 text-foreground border-brand-500/75 dark:border-brand/30 hover:border-brand-600 dark:hover:border-brand focus-visible:outline-brand-600 data-[state=open]:bg-brand-400/80 dark:data-[state=open]:bg-brand-500/80 data-[state=open]:outline-brand-600 w-full flex items-center justify-center text-base px-4 py-2 h-[42px]"
+                                    className="relative bg-[#006239] border-emerald-400 cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 dark:hover:bg-brand/50 text-foreground border-brand-500/75 dark:border-brand/30 hover:border-brand-600 dark:hover:border-brand focus-visible:outline-brand-600 data-[state=open]:bg-brand-400/80 dark:data-[state=open]:bg-brand-500/80 data-[state=open]:outline-brand-600 w-full flex items-center justify-center text-base px-4 py-2 h-[42px]"
                                     fdprocessedid="z4m6j"
-                                // onClick={userSignIn}
                                 >
                                     {" "}
                                     <span className="truncate">Sign In</span>{" "}
@@ -143,7 +201,7 @@ export default function LoginPage() {
                 </div>
                 <div className="self-center my-8 text-sm">
                     <div>
-                        <span className="text-foreground-light">Don't have an account?</span>{" "}
+                        <span className="text-foreground-light text-gray-300">Don't have an account?</span>{" "}
                         <Link href="/signup">
                             <u>
                                 Sign Up Now
