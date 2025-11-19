@@ -1,11 +1,13 @@
 'use client'
 import Link from "next/link"
-import { use, useState } from "react"
+import { useState } from "react"
 import HideEyeIcon from "../../../../public/svgs/hideEyeIcon"
 import ShowEyeIcon from "../../../../public/svgs/showEyeIcon"
 import { signInWithEmailAndPassword } from "firebase/auth"
-import { auth, db } from "../../../../config"
+import { auth } from "../../../../config"
 import toast from "react-hot-toast"
+import ThreeDotLoader from "../loader"
+import { useRouter } from "next/navigation"
 // import { collection, getDocs } from "firebase/firestore"
 
 
@@ -17,13 +19,20 @@ export default function LoginPage() {
     })
     const [emptyInputs, setEmptyInputs] = useState(false)
     const [showError, setShowError] = useState(false)
+    const [loading , setLoading] = useState(false)
+    const[submitBtnDisabled , setSubmitBtnDisabled] = useState(false)
 
 
     console.log(loginData)
 
+    const router = useRouter();
+
     const userSignIn = () => {
+        setLoading(true)
         if (!loginData.email || !loginData.password) {
             setEmptyInputs(true);
+            setSubmitBtnDisabled(false);
+            setLoading(false)
             return
         }
         signInWithEmailAndPassword(auth, loginData.email, loginData.password)
@@ -31,19 +40,25 @@ export default function LoginPage() {
                 // Signed in 
                 const user = userCredential.user;
                 console.log(user, "User Sign ho chuka he")
+                toast.success('Sign In Successfully!')
+                router.push('/dashboard')
                 setLoginData({
                     email: "",
                     password: ""
                 })
                 setShowError(false)
                 setEmptyInputs(false)
+                setSubmitBtnDisabled(false);
+                setLoading(false)
                 // ...
             })
             .catch((error) => {
                 const errorCode = error.code;
-                toast.error(errorCode)
-                setShowError(true)
                 const errorMessage = error.message;
+                toast.error(errorMessage)
+                setShowError(true)
+                setSubmitBtnDisabled(false);
+                setLoading(false)
             });
 
     }
@@ -193,7 +208,12 @@ export default function LoginPage() {
                             className="flex items-center relative"
 
                         >
-                            <div className="w-full" onClick={userSignIn} >
+                            <div className={`w-full ${submitBtnDisabled ? "opacity-50 pointer-events-none" : ""} `} onClick={() => {
+                                 if (!submitBtnDisabled) {
+                                    setSubmitBtnDisabled(true);
+                                    userSignIn();
+                                }
+                            }} >
                                 <button
                                     type="button"
 
@@ -201,7 +221,7 @@ export default function LoginPage() {
                                     
                                 >
                                     {" "}
-                                    <span className="truncate">Sign In</span>{" "}
+                                    <span className="truncate">{loading === true ? <><ThreeDotLoader/></> : "Sign In"}</span>{" "}
                                 </button>
                             </div>
                         </div>
