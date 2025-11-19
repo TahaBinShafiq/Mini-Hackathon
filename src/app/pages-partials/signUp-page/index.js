@@ -1,13 +1,20 @@
 'use client'
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import HideEyeIcon from "../../../../public/svgs/hideEyeIcon";
 import ShowEyeIcon from "../../../../public/svgs/showEyeIcon";
 import { app, auth, db } from "../../../../config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
+import axios from "axios";
+
+const API_KEY = 'q9Tf0J_GJQaZ9-4BO0X8bb-qtCY'
+const CLOUD_NAME = 'dugxuuj5w';
+const UPLOAD_PRESET = 'profile';
+const API_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+
 export default function SignUpPage() {
     const [showPass, setShowPass] = useState(false)
     const [userData, setUserData] = useState({
@@ -15,7 +22,6 @@ export default function SignUpPage() {
         email: "",
         gender: "",
         dateOfBirth: "",
-        userProfile: "",
         password: "",
 
     })
@@ -23,25 +29,31 @@ export default function SignUpPage() {
     const [file, setFile] = useState(null);
 
 
-    const submitForm = () => {
+    const fileInputRef = useRef(null);
+    const submitForm = async () => {
 
-        if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth || !userData.userProfile) {
+        if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth || !file) {
             setEmptyInputs(true);
             return;
         }
+        const profileImageUrl = await imageUploading();
         setEmptyInputs(false)
         createUserWithEmailAndPassword(auth, userData.email, userData.password)
             .then((userCredential) => {
                 // Signed up 
                 const user = userCredential.user;
                 console.log("User Auth me Save Hogia he", user)
-
+                imageUploading
                 addUserToDb(user.uid).then(() => {
                     setUserData({
                         fullName: "",
                         email: "",
-                        password: ""
+                        password: "",
+                        dateOfBirth: "",
+                        gender: ""
                     })
+                    setFile(null)
+                    fileInputRef.current.value = null;
                 })
                 // ...
             })
@@ -54,14 +66,39 @@ export default function SignUpPage() {
     }
 
 
+    const imageUploading = async () => {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('upload_preset', UPLOAD_PRESET)
+
+        try {
+            const response = await axios.post(API_URL, formData)
+            console.log(response)
+            return
+
+        } catch (error) {
+            console.log("clodinar image upload error", error)
+        }
+
+    }
+
+
     const addUserToDb = async (id) => {
-        await setDoc(doc(db, "users", id), {
-            name: userData.fullName,
-            email: userData.email,
-            gender: userData.gender,
-            dateOfBirth: userData.dateOfBirth,
-            id: id
-        })
+
+        try {
+            await setDoc(doc(db, "users", id), {
+                name: userData.fullName,
+                email: userData.email,
+                gender: userData.gender,
+                dateOfBirth: userData.dateOfBirth,
+                id: id,
+
+            })
+            console.log('user db me save hogia he')
+
+        } catch (error) {
+            console.log("user db me save nahi howa", error)
+        }
     }
 
     console.log(userData)
@@ -141,7 +178,6 @@ export default function SignUpPage() {
                                         <input
                                             type="email"
                                             id="email"
-                                            autoComplete="email"
                                             name="email"
                                             placeholder="you@example.com"
                                             className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
@@ -215,7 +251,7 @@ export default function SignUpPage() {
                                         Fill this field
                                     </p>
 
-                                   
+
                                 </div>
                             </div>
 
@@ -278,10 +314,11 @@ export default function SignUpPage() {
                                         name="name"
                                         accept="image/png, image/jpg, image/jpeg"
                                         className={` cursor-pointer w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-1.5 h-[34px] 
-                                              ${emptyInputs && !userData.fullName ? "border-red-500 focus-visible:ring-red-500" : ""}`
+                                              ${emptyInputs && !file ? "border-red-500 focus-visible:ring-red-500" : ""}`
                                         }
-                                    value={userData.userProfile}
-                                    onChange={(e) => setFile(e.target.files)}
+
+                                        ref={fileInputRef}
+                                        onChange={(e) => setFile(e.target.files[0])}
                                     />
 
                                 </div>
@@ -317,7 +354,6 @@ export default function SignUpPage() {
                                                 <input
                                                     type={showPass ? "text" : "password"}
                                                     id="password"
-                                                    autoComplete="current-password"
                                                     name="password"
                                                     placeholder="••••••••"
                                                     className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
