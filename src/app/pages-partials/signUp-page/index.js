@@ -7,6 +7,7 @@ import ShowEyeIcon from "../../../../public/svgs/showEyeIcon";
 import { app, auth, db } from "../../../../config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 export default function SignUpPage() {
     const [showPass, setShowPass] = useState(false)
     const [userData, setUserData] = useState({
@@ -14,15 +15,17 @@ export default function SignUpPage() {
         email: "",
         gender: "",
         dateOfBirth: "",
+        userProfile: "",
         password: "",
 
     })
     const [emptyInputs, setEmptyInputs] = useState(false)
+    const [file, setFile] = useState(null);
 
 
     const submitForm = () => {
 
-        if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth) {
+        if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth || !userData.userProfile) {
             setEmptyInputs(true);
             return;
         }
@@ -44,6 +47,7 @@ export default function SignUpPage() {
             })
             .catch((error) => {
                 const errorCode = error.code;
+                toast.error(errorCode)
                 const errorMessage = error.message;
                 // ..
             });
@@ -66,12 +70,14 @@ export default function SignUpPage() {
         setShowPass(!showPass)
     }
 
+    console.log(file)
+
 
     return (
         <>
 
             <div className="flex-1 flex flex-col justify-center w-[330px] sm:w-[384px] mx-auto">
-                <div className="mb-10">
+                <div className="mb-5">
                     <h1 className="mt-8 mb-2 lg:text-3xl">Get started</h1>
                     <h2 className="text-sm text-foreground-light text-gray-300">Create a new account</h2>
                 </div>
@@ -111,7 +117,7 @@ export default function SignUpPage() {
                                         </p>
                                     </div>
 
-                                    <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
+
                                 </div>
                             </div>
                             <div name="email" className="relative text-sm flex flex-col gap-2">
@@ -144,9 +150,21 @@ export default function SignUpPage() {
                                             value={userData.email}
                                             onChange={(event) => setUserData({ ...userData, email: event.target.value })}
                                         />
-                                        <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.fullName ? "opacity-100" : "opacity-0"
-                                            }`}>
-                                            Fill this field
+                                        <p
+                                            className={`text-[10px] mt-1 transition-all duration-200 
+                                                   ${emptyInputs && !userData.email
+                                                    ? "text-red-500 opacity-100"
+                                                    : userData.email && !userData.email.includes("@")
+                                                        ? "text-yellow-400 opacity-100"
+                                                        : "opacity-0"
+                                                }
+                                                 `}
+                                        >
+                                            {emptyInputs && !userData.email
+                                                ? "Fill this field"
+                                                : userData.email && !userData.email.includes("@")
+                                                    ? "Enter a valid email (must contain @)"
+                                                    : ""}
                                         </p>
                                     </div>
                                     <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
@@ -154,8 +172,8 @@ export default function SignUpPage() {
                             </div>
                         </div>
 
-                        <div className="flex gap-[8px]">
-                            <div name="email" className="relative text-sm flex flex-col gap-2">
+                        <div className="flex w-full justify-between gap-[8px]">
+                            <div name="email" className="relative text-sm flex w-full flex-col gap-2">
                                 <div
                                     className="transition-all duration-500 ease-in-out flex flex-row gap-2 justify-between"
                                 >
@@ -173,7 +191,7 @@ export default function SignUpPage() {
                                         <select
                                             id="gender"
                                             name="gender"
-                                            className={`w-[189px] cursor-pointer rounded-md border border-control bg-black text-sm leading-4 px-2 h-[34px]
+                                            className={`w-full cursor-pointer rounded-md border border-control bg-black text-sm leading-4 px-2 h-[34px]
                                                         placeholder:text-foreground-muted
                                                         focus-visible:outline-none focus-visible:ring-1
                                                         focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted
@@ -197,11 +215,11 @@ export default function SignUpPage() {
                                         Fill this field
                                     </p>
 
-                                    <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
+                                   
                                 </div>
                             </div>
 
-                            <div name="email" className="relative text-sm flex flex-col gap-2">
+                            <div name="email" className="relative text-sm w-full flex flex-col gap-2">
                                 <div
                                     className="transition-all duration-500 ease-in-out flex flex-row gap-2 justify-between"
 
@@ -221,7 +239,7 @@ export default function SignUpPage() {
                                             type="date"
                                             id="date"
                                             name="date"
-                                            className={` w-[189px] cursor-pointer rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-2 py-0 w-[176px] h-[34px] 
+                                            className={` w-full cursor-pointer rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-2 py-0 w-[176px] h-[34px] 
                                               ${emptyInputs && !userData.dateOfBirth ? "border-red-500 focus-visible:ring-red-500" : ""}`
                                             }
                                             value={userData.dateOfBirth}
@@ -233,13 +251,44 @@ export default function SignUpPage() {
                                         }`}>
                                         Fill this field
                                     </p>
-
-                                    <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
                                 </div>
                             </div>
 
                         </div>
 
+                        <div name="email" className="relative text-sm flex flex-col gap-2">
+                            <div
+                                className="transition-all duration-500 ease-in-out flex flex-row gap-2 justify-between"
+
+                            >
+                                <label
+                                    className="text-sm text peer-disabled:cursor-not-allowed peer-disabled:opacity-70 transition-colors text-foreground flex gap-2 items-center break-all leading-normal"
+                                    htmlFor="profile"
+                                >
+                                    <span>Select Profile Picture</span>
+                                </label>
+                            </div>
+                            <div
+                                className="transition-all duration-500 ease-in-out order-1 col-span-12"
+                            >
+                                <div >
+                                    <input
+                                        type="file"
+                                        id="profile"
+                                        name="name"
+                                        accept="image/png, image/jpg, image/jpeg"
+                                        className={` cursor-pointer w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-1.5 h-[34px] 
+                                              ${emptyInputs && !userData.fullName ? "border-red-500 focus-visible:ring-red-500" : ""}`
+                                        }
+                                    value={userData.userProfile}
+                                    onChange={(e) => setFile(e.target.files)}
+                                    />
+
+                                </div>
+
+                                <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
+                            </div>
+                        </div>
 
 
                         <div className="relative">
@@ -277,9 +326,22 @@ export default function SignUpPage() {
                                                     value={userData.password}
                                                     onChange={(event) => setUserData({ ...userData, password: event.target.value })}
                                                 />
-                                                <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !userData.fullName ? "opacity-100" : "opacity-0"
-                                                    }`}>
-                                                    Fill this field
+                                                <p className={`text-[10px] mt-1 transition-all 
+                                                          ${emptyInputs && !userData.password
+                                                        ? "text-red-500 opacity-100"
+                                                        : userData.password && userData.password.length < 9
+                                                            ? "text-yellow-400 opacity-100"
+                                                            : userData.password && userData.password.length >= 9
+                                                                ? "text-green-500 opacity-100"
+                                                                : "opacity-0"}
+                                                                   `}>
+                                                    {emptyInputs && !userData.password
+                                                        ? "Fill this field"
+                                                        : userData.password && userData.password.length < 9
+                                                            ? "Choose a strong password (9+ chars)"
+                                                            : userData.password && userData.password.length >= 9
+                                                                ? "Strong Password"
+                                                                : ""}
                                                 </p>
                                                 <button
 

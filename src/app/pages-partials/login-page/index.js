@@ -5,6 +5,7 @@ import HideEyeIcon from "../../../../public/svgs/hideEyeIcon"
 import ShowEyeIcon from "../../../../public/svgs/showEyeIcon"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth, db } from "../../../../config"
+import toast from "react-hot-toast"
 // import { collection, getDocs } from "firebase/firestore"
 
 
@@ -15,7 +16,7 @@ export default function LoginPage() {
         password: ''
     })
     const [emptyInputs, setEmptyInputs] = useState(false)
-    const[showError , setShowError] = useState(false)
+    const [showError, setShowError] = useState(false)
 
 
     console.log(loginData)
@@ -31,8 +32,8 @@ export default function LoginPage() {
                 const user = userCredential.user;
                 console.log(user, "User Sign ho chuka he")
                 setLoginData({
-                    email : "",
-                    password : ""
+                    email: "",
+                    password: ""
                 })
                 setShowError(false)
                 setEmptyInputs(false)
@@ -40,6 +41,7 @@ export default function LoginPage() {
             })
             .catch((error) => {
                 const errorCode = error.code;
+                toast.error(errorCode)
                 setShowError(true)
                 const errorMessage = error.message;
             });
@@ -78,7 +80,7 @@ export default function LoginPage() {
                     <h2 className="text-sm text-gray-300 text-foreground-light">Sign in to your account</h2>
                 </div>
                 <div className="flex flex-col gap-5">
-                    <form id="sign-in-form" className="flex flex-col gap-4">
+                    <form id="sign-in-form" className="flex flex-col gap-1">
                         <div>
                             <div name="email" className="relative text-sm flex flex-col gap-2">
                                 <div
@@ -103,13 +105,16 @@ export default function LoginPage() {
                                             autoComplete="email"
                                             name="email"
                                             placeholder="you@example.com"
-
                                             className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
                                               ${emptyInputs && !loginData.email ? "border-red-500 focus-visible:ring-red-500" : ""}`
                                             }
                                             value={loginData.email}
                                             onChange={(event) => { setLoginData({ ...loginData, email: event.target.value }) }}
                                         />
+                                        <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !loginData.email ? "opacity-100" : "opacity-0"
+                                            }`}>
+                                            Fill this field
+                                        </p>
                                     </div>
                                     <div className="mt-2" style={{ opacity: 1, transform: "none" }} />
                                 </div>
@@ -152,6 +157,11 @@ export default function LoginPage() {
                                                     value={loginData.password}
                                                     onChange={(event) => { setLoginData({ ...loginData, password: event.target.value }) }}
                                                 />
+                                                <p className={`text-red-500 text-[10px] mt-0 transition-all duration-200 ${emptyInputs && !loginData.password ? "opacity-100" : "opacity-0"
+                                                    }`}>
+                                                    Fill this field
+                                                </p>
+                                                {showError === true ? <p className="text-red-600 text-[10px]">Invalid credentials</p> : ""}
                                                 <button
                                                     type="button"
                                                     title="Show password"
@@ -176,7 +186,7 @@ export default function LoginPage() {
                             >
                                 Forgot Password?
                             </a>
-                        {showError === true ? <p className="text-red-600 text-[10px]">Invalid credentials</p> : ""}
+
                         </div>
 
                         <div
