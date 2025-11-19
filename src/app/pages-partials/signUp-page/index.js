@@ -10,6 +10,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import ThreeDotLoader from "../loader";
 
 const API_KEY = 'q9Tf0J_GJQaZ9-4BO0X8bb-qtCY'
 const CLOUD_NAME = 'dugxuuj5w';
@@ -109,7 +110,7 @@ export default function SignUpPage() {
             setBtnDisabled(false)
             toast.success('Sign Up Successfully!')
             router.push('/dashboard')
-            
+
 
         } catch (error) {
             console.log("user db me save nahi howa", error)
@@ -204,7 +205,7 @@ export default function SignUpPage() {
                                             className={`text-[10px] mt-1 transition-all duration-200 
                                                    ${emptyInputs && !userData.email
                                                     ? "text-red-500 opacity-100"
-                                                    : userData.email && !userData.email.includes("@")
+                                                    : userData.email && !userData.email.includes("@gmail.com")
                                                         ? "text-yellow-400 opacity-100"
                                                         : "opacity-0"
                                                 }
@@ -212,8 +213,8 @@ export default function SignUpPage() {
                                         >
                                             {emptyInputs && !userData.email
                                                 ? "Fill this field"
-                                                : userData.email && !userData.email.includes("@")
-                                                    ? "Enter a valid email (must contain @)"
+                                                : userData.email && !userData.email.includes("@gmail.com")
+                                                    ? "Enter a valid email (must contain @gmail.com)"
                                                     : ""}
                                         </p>
                                     </div>
@@ -430,7 +431,7 @@ export default function SignUpPage() {
                                     className="relative bg-[#006239]  border-emerald-400  mt-[15px] cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all focus-visible:outline-4 focus-visible:outline-offset-1 border bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 dark:hover:bg-brand/50 text-foreground border-brand-500/75 dark:border-brand/30 hover:border-brand-600 dark:hover:border-brand focus-visible:outline-brand-600 data-[state=open]:bg-brand-400/80 dark:data-[state=open]:bg-brand-500/80 data-[state=open]:outline-brand-600 w-full flex items-center justify-center text-base px-4 py-2 h-[42px]"
                                 >
                                     {" "}
-                                    <span className="truncate">{loading === true ? "loading..." : "Sign Up"}</span>{" "}
+                                    <span className="truncate">{loading === true ? <><ThreeDotLoader /></> : "Sign Up"}</span>{" "}
                                 </button>
                             </div>
                         </div>
