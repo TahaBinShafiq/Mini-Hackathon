@@ -1,5 +1,6 @@
 import SignUpPage from "../pages-partials/signUp-page";
+import PublicRoute from "../provider/publicRoute";
 
 export default function SignUp(){
-    return<SignUpPage/>
+    return <PublicRoute> <SignUpPage/> </PublicRoute>
 }

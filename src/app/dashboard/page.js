@@ -1,5 +1,6 @@
 import DashboardPage from "../pages-partials/dashboard";
+import ProtectedRoute from "../provider/protectedRoute";
 
 export default function Dashboard(){
-    return<DashboardPage/>
+    return <ProtectedRoute> <DashboardPage/> </ProtectedRoute> 
 }

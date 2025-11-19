@@ -1,7 +1,8 @@
 import LoginPage from "../pages-partials/login-page";
+import PublicRoute from "../provider/publicRoute";
 
 export default function Login() {
-    return <LoginPage/>
+    return  <PublicRoute> <LoginPage/></PublicRoute>
        
 }
 
