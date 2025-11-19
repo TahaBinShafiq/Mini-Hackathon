@@ -1,4 +1,5 @@
 'use client'
+import UserProfileDropdown from "@/components/ui/user-profile-dropdown";
 import { getAuth, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 
@@ -19,7 +20,7 @@ export default function DashboardPage() {
         <>
             <div className="flex justify-between p-2">
                 <h1 className="text-4xl">Dashboard Page</h1>
-                <button className="border p-3 cursor-pointer rounded-[5px]" onClick={logOutfunc}>Log Out</button>
+                <UserProfileDropdown logOut={logOutfunc}/>
             </div>
         </>
     )
