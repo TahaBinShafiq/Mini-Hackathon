@@ -9,6 +9,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const API_KEY = 'q9Tf0J_GJQaZ9-4BO0X8bb-qtCY'
 const CLOUD_NAME = 'dugxuuj5w';
@@ -27,16 +28,20 @@ export default function SignUpPage() {
     })
     const [emptyInputs, setEmptyInputs] = useState(false)
     const [file, setFile] = useState(null);
-
-
     const fileInputRef = useRef(null);
-    const submitForm = async () => {
+    const [loading, setLoading] = useState(false)
+    const [submitBtnDisabled, setBtnDisabled] = useState(false);
+    const router = useRouter();
 
+
+    const submitForm = async () => {
+        setLoading(true)
         if (!userData.fullName || !userData.email || !userData.password || !userData.gender || !userData.dateOfBirth || !file) {
             setEmptyInputs(true);
+            setBtnDisabled(false);
+            setLoading(false)
             return;
         }
-        const profileImageUrl = await imageUploading();
         setEmptyInputs(false)
         createUserWithEmailAndPassword(auth, userData.email, userData.password)
             .then((userCredential) => {
@@ -54,6 +59,7 @@ export default function SignUpPage() {
                     })
                     setFile(null)
                     fileInputRef.current.value = null;
+                    setLoading(false)
                 })
                 // ...
             })
@@ -61,11 +67,14 @@ export default function SignUpPage() {
                 const errorCode = error.code;
                 toast.error(errorCode)
                 const errorMessage = error.message;
+                setBtnDisabled(false);
+                setLoading(false)
                 // ..
-            });
+            })
     }
 
 
+    console.log(loading)
     const imageUploading = async () => {
         const formData = new FormData()
         formData.append('file', file)
@@ -73,8 +82,8 @@ export default function SignUpPage() {
 
         try {
             const response = await axios.post(API_URL, formData)
-            console.log(response)
-            return
+            console.log(response.data)
+            return response.data.url
 
         } catch (error) {
             console.log("clodinar image upload error", error)
@@ -84,7 +93,8 @@ export default function SignUpPage() {
 
 
     const addUserToDb = async (id) => {
-
+        const profileImageUrl = await imageUploading();
+        console.log(profileImageUrl)
         try {
             await setDoc(doc(db, "users", id), {
                 name: userData.fullName,
@@ -92,9 +102,14 @@ export default function SignUpPage() {
                 gender: userData.gender,
                 dateOfBirth: userData.dateOfBirth,
                 id: id,
+                userProfile: profileImageUrl
 
             })
             console.log('user db me save hogia he')
+            setBtnDisabled(false)
+            toast.success('Sign Up Successfully!')
+            router.push('/dashboard')
+            
 
         } catch (error) {
             console.log("user db me save nahi howa", error)
@@ -139,7 +154,6 @@ export default function SignUpPage() {
                                     <div >
                                         <input
                                             type="text"
-                                            id="name"
                                             name="name"
                                             placeholder="Full Name"
                                             className={`flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-muted read-only:text-foreground-light focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background-control focus-visible:ring-offset-1 focus-visible:ring-offset-foreground-muted disabled:cursor-not-allowed disabled:text-foreground-muted aria-[] aria-[invalid=true]:bg-destructive-200 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive text-sm leading-4 px-3 py-3 h-[34px] 
@@ -401,22 +415,22 @@ export default function SignUpPage() {
 
                         <div
                             className="flex items-center relative"
-                            data-sentry-component="LastSignInWrapper"
-                            data-sentry-source-file="LastSignInWrapper.tsx"
                         >
-                            <div className="w-full" onClick={submitForm}>
+                            <div className={`w-full ${submitBtnDisabled ? "opacity-50 pointer-events-none" : ""} `} onClick={() => {
+                                if (!submitBtnDisabled) {
+                                    setBtnDisabled(true)
+                                    submitForm();
+                                }
+                            }}>
 
                                 <button
-                                    data-size="large"
                                     form="sign-in-form"
                                     type="button"
                                     data-sentry-element="Button"
-                                    data-sentry-source-file="SignInForm.tsx"
                                     className="relative bg-[#006239]  border-emerald-400  mt-[15px] cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all focus-visible:outline-4 focus-visible:outline-offset-1 border bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 dark:hover:bg-brand/50 text-foreground border-brand-500/75 dark:border-brand/30 hover:border-brand-600 dark:hover:border-brand focus-visible:outline-brand-600 data-[state=open]:bg-brand-400/80 dark:data-[state=open]:bg-brand-500/80 data-[state=open]:outline-brand-600 w-full flex items-center justify-center text-base px-4 py-2 h-[42px]"
-                                    fdprocessedid="z4m6j"
                                 >
                                     {" "}
-                                    <span className="truncate">Sign Up</span>{" "}
+                                    <span className="truncate">{loading === true ? "loading..." : "Sign Up"}</span>{" "}
                                 </button>
                             </div>
                         </div>
