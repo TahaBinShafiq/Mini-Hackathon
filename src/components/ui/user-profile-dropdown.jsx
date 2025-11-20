@@ -1,5 +1,10 @@
 "use client";;
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { AuthContext } from "../../../context/auth-context";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../config";
+import Image from "next/image";
+import ThreeDotLoader from "@/app/pages-partials/loader";
 
 const User = (props) => (
   <svg
@@ -123,7 +128,7 @@ const DropdownMenu = ({
       </div>
       {isOpen && (
         <div
-          className="origin-top-right absolute right-0 mt-2 w-72 rounded-xl shadow-xl bg-white dark:bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-in fade-in-0 zoom-in-95 p-2"
+          className="origin-top-right absolute right-0 mt-2 w-72 rounded-xl shadow-xl text-white bg-neutral-900 dark:bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-in fade-in-0 zoom-in-95 p-2"
           role="menu"
           aria-orientation="vertical">
           {children}
@@ -143,7 +148,7 @@ const DropdownMenuItem = ({
       e.preventDefault();
       if (onClick) onClick();
     }}
-    className="text-zinc-700 dark:text-zinc-300 group flex items-center px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150"
+    className="text-zinc-700 dark:text-zinc-300 group flex items-center px-3 py-2.5 text-sm rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors duration-150"
     role="menuitem">
     {children}
   </a>
@@ -153,40 +158,75 @@ const DropdownMenuSeparator = () => (
   <div className="my-2 h-px bg-zinc-200 dark:bg-zinc-700" />
 );
 
-export default function UserProfileDropdown({logOut}) {
-  
+export default function UserProfileDropdown({ logOut }) {
+
+  const { firebaseUser } = useContext(AuthContext)
+  const [loading , setLoading] = useState(false)
+  const { uid } = firebaseUser
+  console.log(uid)
+
+  const [userData, setUserData] = useState({})
+  const getUserData = async () => {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // console.log("Document data:", docSnap.data());
+      setUserData(docSnap.data())
+      setLoading(true)
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+      setLoading(true)
+    }
+  }
+
+  const { name, email, userProfile } = userData
+
+
+  useEffect(() => {
+    getUserData()
+  }, [firebaseUser, uid])
+
   return (
+
     <div className="flex items-center justify-center font-sans p-0">
-      <DropdownMenu
+      {loading === true ? <><DropdownMenu
         trigger={
           <button
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 dark:hover:bg-zinc-800 transition-colors">
-            <div
-              className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              JD
+            <div>
+              <img
+                src={userProfile}
+                alt="Profile Picture"
+                className="h-[30px] w-[30px] object-cover rounded-xl"
+              />
+
             </div>
             <div className="text-left">
               <div className="text-sm font-medium text-white dark:text-zinc-100">
-                John Doe
+                {name}
               </div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                john@example.com
+                {email}
               </div>
             </div>
           </button>
         }>
-        <div className="px-3 py-3 border-b border-zinc-200 dark:border-zinc-700">
+        <div className="px-3 py-3 border-b  border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center space-x-3">
-            <div
-              className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-              JD
+            <div>
+               <img
+                src={userProfile}
+                alt="Profile Picture"
+                className="h-[40px] w-[40px] object-cover rounded-xl"
+              />
             </div>
             <div>
-              <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                John Doe
+              <div className="text-sm font-semibold text-white dark:text-zinc-100">
+                {name}
               </div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                john@example.com
+                {email}
               </div>
               <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                 Pro Plan
@@ -197,16 +237,22 @@ export default function UserProfileDropdown({logOut}) {
 
         <div className="py-1">
           <DropdownMenuItem onClick={() => console.log("Profile")}>
-            <User className="mr-3 h-4 w-4 text-zinc-500" />
-            Your Profile
+            <User className="mr-3 h-4 w-4 text-white" />
+            <span className="text-white">
+              Your Profile
+            </span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => console.log("Settings")}>
-            <Settings className="mr-3 h-4 w-4 text-zinc-500" />
-            Settings
+            <Settings className="mr-3 h-4 w-4 text-white" />
+            <span className="text-white">
+              Settings
+            </span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => console.log("Billing")}>
-            <CreditCard className="mr-3 h-4 w-4 text-zinc-500" />
-            Billing & Plans
+            <CreditCard className="mr-3 h-4 w-4 text-white" />
+            <span className="text-white">
+              Billing & Plans
+            </span>
           </DropdownMenuItem>
         </div>
 
@@ -214,15 +260,20 @@ export default function UserProfileDropdown({logOut}) {
 
         <div className="py-1">
           <DropdownMenuItem onClick={() => console.log("Help")}>
-            <HelpCircle className="mr-3 h-4 w-4 text-zinc-500" />
-            Help & Support
+            <HelpCircle className="mr-3 h-4 w-4 text-white" />
+            <span className="text-white">
+              Help & Support
+            </span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => logOut()}>
-            <LogOut className="mr-3 h-4 w-4 text-zinc-500" />
-            Sign Out
+            <LogOut className="mr-3 h-4 w-4 text-white" />
+            <span className="text-white">
+              Sign Out
+            </span>
           </DropdownMenuItem>
         </div>
-      </DropdownMenu>
+      </DropdownMenu></> : <><ThreeDotLoader/></>}
+      
     </div>
   );
 }
