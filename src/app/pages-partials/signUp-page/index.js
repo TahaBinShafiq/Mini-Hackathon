@@ -59,7 +59,7 @@ export default function SignUpPage() {
                         gender: ""
                     })
                     setFile(null)
-                    fileInputRef.current.value = null;
+                    fileInputRef?.current && (fileInputRef.current.value = null);
                     setLoading(false)
                 })
                 // ...
