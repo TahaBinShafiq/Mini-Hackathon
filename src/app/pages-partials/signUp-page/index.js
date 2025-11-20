@@ -110,8 +110,6 @@ export default function SignUpPage() {
             setBtnDisabled(false)
             toast.success('Sign Up Successfully!')
             router.push('/dashboard')
-
-
         } catch (error) {
             console.log("user db me save nahi howa", error)
         }

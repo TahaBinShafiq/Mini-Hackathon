@@ -161,22 +161,23 @@ const DropdownMenuSeparator = () => (
 export default function UserProfileDropdown({ logOut }) {
 
   const { firebaseUser } = useContext(AuthContext)
-  const [loading , setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const { uid } = firebaseUser
   console.log(uid)
 
   const [userData, setUserData] = useState({})
   const getUserData = async () => {
+    setLoading(true)
     const docRef = doc(db, "users", uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       // console.log("Document data:", docSnap.data());
       setUserData(docSnap.data())
-      setLoading(true)
+      setLoading(false)
     } else {
       // docSnap.data() will be undefined in this case
       console.log("No such document!");
-      setLoading(true)
+      setLoading(false)
     }
   }
 
@@ -190,7 +191,7 @@ export default function UserProfileDropdown({ logOut }) {
   return (
 
     <div className="flex items-center justify-center font-sans p-0">
-      {loading === true ? <><DropdownMenu
+      {loading === false ? <><DropdownMenu
         trigger={
           <button
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 dark:hover:bg-zinc-800 transition-colors">
@@ -215,7 +216,7 @@ export default function UserProfileDropdown({ logOut }) {
         <div className="px-3 py-3 border-b  border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center space-x-3">
             <div>
-               <img
+              <img
                 src={userProfile}
                 alt="Profile Picture"
                 className="h-[40px] w-[40px] object-cover rounded-xl"
@@ -272,8 +273,8 @@ export default function UserProfileDropdown({ logOut }) {
             </span>
           </DropdownMenuItem>
         </div>
-      </DropdownMenu></> : <><ThreeDotLoader/></>}
-      
+      </DropdownMenu></> : <><ThreeDotLoader /></>}
+
     </div>
   );
 }
